@@ -1,0 +1,16 @@
+name: akehrer.github.io
+description: Theme song!
+meta_description: "akehrer.github.io"
+
+markdown: redcarpet
+highlighter: pygments
+logo: false
+paginate: 15
+baseurl: /
+domain_name: 'https://akehrer.github.io'
+google_analytics: 'UA-XXXXXXXX-X'
+
+# Details for the RSS feed generator
+url:            'https://akehrer.github.io'
+author:         'akehrer'
+bio: 			'An engineer...'
