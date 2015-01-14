@@ -2,7 +2,7 @@
 layout: post
 title:  "Getting Started With Nim"
 date:   2015-01-05 10:18:00
-categories: nim
+categories: Nim
 ---
 
 Having been a long time Python user I often find myself reaching for it over languages. When I saw the announcement for version 0.10.2 of [Nim][nim-lang] on [Hacker News][hn-nim] it got me interested in learning another language, especially one that compiles to C and executables. I have some experience with C and C++ having done some Arduino projects, but my biggest memory of it is from a programming data structures class I took as an undergrad. All that memory management somehow didn't fit my brain's way of thinking and it turned me off to programming as a profession.

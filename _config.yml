@@ -2,6 +2,8 @@ name: akehrer.github.io
 description: Theme song!
 meta_description: "akehrer.github.io"
 
+copyright: "2015"
+
 markdown: redcarpet
 highlighter: pygments
 logo: false
