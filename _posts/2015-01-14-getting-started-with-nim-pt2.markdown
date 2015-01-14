@@ -131,6 +131,8 @@ So the `*` procedure is looking for two parameters of the same type, but it's ge
 
 All in all I like what I've seen so far with Nim. I feel it was easy to pick up and get started. The documentation is adequate but not complete, which is not surprising for a young language. So far I've used it more like a complied Python and haven't gotten too deep into its unique features. It will be interesting to see if it can be used to create Python modules, maybe by interfacing through [cython](http://cython.org/). But that's for another time.
 
+You can find the code for my `nim-statistics` module [here](https://github.com/akehrer/nim-statistics).
+
 ### Reference
 [Part 1][part-1]  
 
