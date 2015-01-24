@@ -5,7 +5,7 @@ date:   2015-01-14 13:18:00
 categories: Nim
 ---
 
-[Last time][part-1] I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the beginning of a model for the [Gaussian Distribution][gauss-wiki]. Today we'll be looking at some of the things I founds as I worked out other procedures in the module.
+[Last time][part-1] I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the beginning of a model for the [Gaussian Distributionn][gauss-wiki]. Today we'll be looking at some of the things I founds as I worked out other procedures in the module.
 
 ### NaN
 Some of the functions in the built-in `math` module return `NaN` as a value but I could not find an easy way in Nim to check for this. Luckily the standard `math.h` library includes an `isnan()` function that we can reuse. In this case I have created an additional procedure to convert the integer result from the C function to a boolean. You can see I also created a NAN constant that I used in some of my code. 

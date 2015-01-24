@@ -5,21 +5,21 @@ date:   2015-01-24 10:18:00
 categories: Nim
 ---
 
-In my [previous][part-2] post I ended with a statment inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things work. So, let's get to the code.
+In my [previous][part-2] post I ended with a statement inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things to work. So, let's get to the code.
 
 ### Compiling a library
 The first thing we need to touch on is the Nim compiler. In most cases you turn your Nim code in to an executable by running the command.
 
     nim c projectfile.nim
 
-But to turn the code in to a library we'll need to look at the [compiler's documentation](http://nim-lang.org/nimc.html). There are quit a few options but the one we are interested in is `--app` and in our case we'll use the `--app:lib` command to create a shared library (`.dll` in Windows, `.so` in linux/OSX).
+But to turn the code in to a library we'll need to look at the [compiler's documentation](http://nim-lang.org/nimc.html). There are quite a few options but the one we are interested in is `--app` and in our case we'll use the `--app:lib` command to create a shared library (`.dll` in Windows, `.so` in linux, `dylib` in OSX).
 
     nim c --app:lib projectfile.nim
 
 Running the above command should create a `projectfile.dll` or `libprojectfile.so` file in the same directory as the `.nim` file. That's great, but it doesn't quite get us what we want. The library has been created but none of our functions have been exposed. Not very useful.
 
 ### The `exportc` & `dynlib` pragmas
-Nim has special methods called [pragmas](http://nim-lang.org/manual.html#pragmas) that give the compiler extra information when it's parsing specific peices of code. We've already see them in use in my previous posts. Remember the follwing code to load the `isnan` function from `math.h`?
+Nim has special methods called [pragmas](http://nim-lang.org/manual.html#pragmas) that give the compiler extra information when it's parsing specific pieces of code. We've already seen them in use in my previous posts. Remember the following code to load the `isnan` function from `math.h`?
 
 {% highlight nim %}
 import math
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     C:\Workspaces\nim-tests>python test1.py
     The sum of 1.0 and 3.0 is: 4.000000
 
-That seems to have fixed it. In the future, when we know we are going to be creating a shared library, Nim has [types](http://nim-lang.org/manual.html#types) that let us add more constraint and reduce these types of mix-ups.
+That seems to have fixed it. In the future, when we know we are going to be creating a shared library, Nim has [types](http://nim-lang.org/manual.html#types) that let us add more constraint and reduce these types of mix-ups (e.g. `cfloat`, `cint`).
 
 ### `openArray` arguments & the header file
 Now let's try something a little more complex and take the `median` function from the [`statistics`](https://github.com/akehrer/nim-statistics) module I created in my last two posts.
@@ -171,7 +171,7 @@ N_LIB_IMPORT N_CDECL(void, NimMain)(void);
 #endif /* __test1__ */
 {% endhighlight %}
 
-The important lines are 13 and 14 where our two exported procedures are called out. We can see that `summer` is looking for two `NF` type arguments which we can assume are Nim type floats. `median` on the other hand is looking for not one argument like in the Nim procedure we defined but two, a pointer to an `NF` and an `NI` which is a Nim integer. There's also a hint about what that interger is, a length value. So the `openArray` argument has been translated in to a standard way of passing arrays in C, a pointer to the array and the length of the array.
+The important lines are 13 and 14 where our two exported procedures are called out. We can see that `summer` is looking for two `NF` type arguments which we can assume are Nim type floats. `median` on the other hand is looking for not one argument like in the Nim procedure we defined but two, a pointer to an `NF` and an `NI` which is a Nim integer. There's also a hint about what that integer is, a length value. So the `openArray` argument has been translated in to a standard way of passing arrays in C, a pointer to the array and the length of the array.
 
 In the Python code you can see we set the correct arguments (`[POINTER(c_double), c_int]`) and return type (`c_double`) and in lines 15 through 18 we cast a Python list of floats in to a C array of doubles. Then when we call the function in line 23 we make sure to convert the list's length to a `c_int`. Let's check the results.
 
@@ -179,7 +179,7 @@ In the Python code you can see we set the correct arguments (`[POINTER(c_double)
     The sum of 1.0 and 3.0 is: 4.000000
     The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
 
-That looks good, and it's probably enough for this post. In furture posts we'll look at interfacing with more types like strings, tuples, and custom objects.
+That looks good, and it's probably enough for this post. In future posts we'll look at interfacing with more types like strings, tuples, and custom objects.
 
 ### Reference
 [Nim Compiler User Guide](http://nim-lang.org/nimc.html)  
@@ -187,5 +187,7 @@ That looks good, and it's probably enough for this post. In furture posts we'll 
 [Python ctypes](https://docs.python.org/2/library/ctypes.html)  
 [Python ctypes Tutorial](http://jjd-comp.che.wisc.edu/index.php/PythonCtypesTutorial)  
 
+
+(Thanks to dom96 for corrections.)
 
 [part-2]: {% post_url 2015-01-14-getting-started-with-nim-pt2 %}
