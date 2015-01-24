@@ -12,7 +12,7 @@ The first thing we need to touch on is the Nim compiler. In most cases you turn 
 
     nim c projectfile.nim
 
-But to turn the code in to a library we'll need to look at the [compiler's documentation](http://nim-lang.org/nimc.html). There are quite a few options but the one we are interested in is `--app` and in our case we'll use the `--app:lib` command to create a shared library (`.dll` in Windows, `.so` in linux, `dylib` in OSX).
+But to turn the code in to a library we'll need to look at the [compiler's documentation](http://nim-lang.org/nimc.html). There are quite a few options but the one we are interested in is `--app` and in our case we'll use the `--app:lib` command to create a shared library (`.dll` in Windows, `.so` in linux, `.dylib` in OSX).
 
     nim c --app:lib projectfile.nim
 
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     C:\Workspaces\nim-tests>python test1.py
     The sum of 1.0 and 3.0 is: 4.000000
 
-That seems to have fixed it. In the future, when we know we are going to be creating a shared library, Nim has [types](http://nim-lang.org/manual.html#types) that let us add more constraint and reduce these types of mix-ups (e.g. `cfloat`, `cint`).
+That seems to have fixed it. When we know we are going to be using `exportc` or creating a shared library Nim has [types](http://nim-lang.org/manual.html#types) that let us add more constraint and reduce these types of mix-ups (e.g. `cfloat`, `cint`).
 
 ### `openArray` arguments & the header file
 Now let's try something a little more complex and take the `median` function from the [`statistics`](https://github.com/akehrer/nim-statistics) module I created in my last two posts.
