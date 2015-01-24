@@ -28,21 +28,21 @@ proc cIsNaN(x: float): int {.importc: "isnan", header: "<math.h>".}
   ## returns non-zero if x is not a number
 {% endhighlight %}
 
-In the above the code between `{.` and `.}` contains the `importc` pragma that tells the compiler to use that code from the `isnan` funtion in `math.h` for the `cIsNaN` Nim procedure.
+In the above the code between `{.` and `.}` contains the `importc` pragma that tells the compiler to use the code from the `isnan` funtion in `math.h` for the `cIsNaN` Nim procedure.
 
 So, if Nim has a way to import code from C it should also have a way to export code to C; and it does, `exportc`. Using `exportc` we can tell the compiler to expose our function to the outside. This plus the [`dynlib`](http://nim-lang.org/manual.html#dynlib-pragma-for-import) pragma makes sure we can access our procedure from the library.
 
 Let's start with something simple.
 
 {% highlight nim %}
-proc summer*(x, y: float): float {. exportc, dynlib.} =
+proc summer*(x, y: float): float {. exportc, dynlib .} =
   result = x + y
 {% endhighlight %}
 
 Saving this as `test1.nim` and running `nim -c --app:lib test1.nim` gives us a `test1.dll` file in windows. Now let's see if we can use it.
 
 ### Python `ctypes`
-To access our compiled library we'll use Python's [`ctypes`](https://docs.python.org/2/library/ctypes.html) module which has been part of the standard library since version 2.5. It allows us to access the C based code that's been compiled in to our library using and convert between Python types and C types. Here's the code to access our `summer` function.
+To access our compiled library we'll use Python's [`ctypes`](https://docs.python.org/2/library/ctypes.html) module which has been part of the standard library since version 2.5. It allows us to access the C based code that's been compiled in to our library and convert between Python types and C types. Here's the code to access our `summer` function.
 
 {% highlight python %}
 from ctypes import *
@@ -68,7 +68,7 @@ We can see that after loading the library we set the argument and return types o
     C:\Workspaces\nim-tests>python test1.py
     The sum of 1.0 and 3.0 is: 32.000008
 
-Hmmm, that's not right. It looks like I may not have used the correct types for my arguments and return. Let's see if we can compare the Nim `float` type to the Python ctypes `c_float` type. According to the [Nim manual](http://nim-lang.org/manual.html#pre-defined-floating-point-types) it's `float` type is set to "the processor's fastest floating point type". The Python [ctypes manual](https://docs.python.org/2/library/ctypes.html#fundamental-data-types) says a `c_float` is the same as a `float` in C. Since I'm running this code using the 32-bit versions of both Nim and Python (2.7) on a 64-bit Windows machine is the Nim compiler making its `float` a `double`?
+Hmmm, that's not right. It looks like we may not have used the correct types for my arguments and return. Let's compare the Nim `float` type to the Python ctypes `c_float` type. According to the [Nim manual](http://nim-lang.org/manual.html#pre-defined-floating-point-types) it's `float` type is set to "the processor's fastest floating point type". The Python [ctypes manual](https://docs.python.org/2/library/ctypes.html#fundamental-data-types) says a `c_float` is the same as a `float` in C. Since I'm running this code using the 32-bit versions of both Nim and Python (2.7) on a 64-bit Windows machine is the Nim compiler making its `float` a `double`?
 
 {% highlight python %}
 from ctypes import *
@@ -173,7 +173,7 @@ N_LIB_IMPORT N_CDECL(void, NimMain)(void);
 
 The important lines are 13 and 14 where our two exported procedures are called out. We can see that `summer` is looking for two `NF` type arguments which we can assume are Nim type floats. `median` on the other hand is looking for not one argument like in the Nim procedure we defined but two, a pointer to an `NF` and an `NI` which is a Nim integer. There's also a hint about what that interger is, a length value. So the `openArray` argument has been translated in to a standard way of passing arrays in C, a pointer to the array and the length of the array.
 
-In the Python code you can see we set the correct arguments (`[POINTER(c_double), c_int]`) and return type (`c_double`) and in lines 15 through 18 we cast a Python list of floats in to a C array of doubles. Then when we call the function in line 23 we make sure to convert the list's lenght in to a `c_int`. Let's check the results.
+In the Python code you can see we set the correct arguments (`[POINTER(c_double), c_int]`) and return type (`c_double`) and in lines 15 through 18 we cast a Python list of floats in to a C array of doubles. Then when we call the function in line 23 we make sure to convert the list's length to a `c_int`. Let's check the results.
 
     C:\Workspaces\nim-tests>python test1.py
     The sum of 1.0 and 3.0 is: 4.000000
