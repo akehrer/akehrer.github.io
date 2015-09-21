@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " vocab="http://ogp.me/ns" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Getting Started With Nim - Part 2 | Down Highway40</title>
+<link href="../../assets/css/all.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
+<link rel="canonical" href="http://akehrer.github.io/posts/getting-started-with-nim-2/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Aaron Kehrer">
+<link rel="prev" href="../getting-started-with-nim/" title="Getting Started With Nim" type="text/html">
+<link rel="next" href="../connecting-nim-to-python/" title="Connecting Nim to Python" type="text/html">
+<meta property="og:site_name" content="Down Highway40">
+<meta property="og:title" content="Getting Started With Nim - Part 2">
+<meta property="og:url" content="http://akehrer.github.io/posts/getting-started-with-nim-2/">
+<meta property="og:description" content="Last time I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2015-01-14T13:18:00-04:00">
+<meta property="article:tag" content="nim">
+</head>
+<body>
+    <a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+            styles, `#sidebar-checkbox` for behavior. -->
+    <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox"><!-- Toggleable sidebar --><div class="sidebar" id="sidebar">
+        <div class="sidebar-item">
+            <p>A reserved <a href="http://getnikola.com" target="_blank">Nikola</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a> for Jekyll,
+            ported to Nikola by <a href="https://twitter.com/ralsina" target="_blank">@ralsina</a>.</p>
+        </div>
+        
+    <nav id="menu" role="navigation" class="sidebar-nav"><a class="sidebar-nav-item" href="../../archive.html">Archive</a>
+        <a class="sidebar-nav-item" href="../../categories/">Tags</a>
+        <a class="sidebar-nav-item" href="../../rss.xml">RSS feed</a>
+    
+    
+    </nav>
+</div>
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          
+    <h3 id="brand" class="masthead-title">
+      <a href="http://akehrer.github.io/" title="Down Highway40" rel="home">Down Highway40</a>
+    </h3>
+
+        </div>
+      </div>
+
+      <div class="container content" id="content">
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="post-title p-name entry-title" itemprop="headline name"><a href="." class="u-url">Getting Started With Nim - Part 2</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn">Aaron Kehrer</span></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="post-date published dt-published" datetime="2015-01-14T13:18:00-04:00" itemprop="datePublished" title="2015-01-14 13:18">2015-01-14 13:18</time></a></p>
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div>
+<p><a href="../getting-started-with-nim">Last time</a> I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the beginning of a model for the <a href="http://en.wikipedia.org/wiki/Normal_distribution">Gaussian Distribution</a>. Today we'll be looking at some of the things I founds as I worked out other procedures in the module.</p>
+<!-- TEASER_END -->
+
+<h4>NaN</h4>
+<p>Some of the functions in the built-in <code>math</code> module return <code>NaN</code> as a value but I could not find an easy way in Nim to check for this. Luckily the standard <code>math.h</code> library includes an <code>isnan()</code> function that we can reuse. In this case I have created an additional procedure to convert the integer result from the C function to a boolean. You can see I also created a NAN constant that I used in some of my code. </p>
+<pre class="code literal-block"><span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">const</span>
+  <span class="n">NAN</span> <span class="o">=</span> <span class="mf">0.0</span><span class="o">/</span><span class="mf">0.0</span> <span class="c"># floating point not a number (NaN)</span>
+
+<span class="k">proc </span><span class="nf">cIsNaN</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="kt">float</span><span class="p">):</span> <span class="kt">int</span> <span class="p">{.</span><span class="n">importc</span><span class="p">:</span> <span class="s">"isnan"</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s">"&lt;math.h&gt;"</span><span class="p">.}</span>
+  <span class="sd">## returns non-zero if x is not a number</span>
+
+<span class="k">proc </span><span class="nf">isNaN</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="kt">float</span><span class="p">):</span> <span class="kt">bool</span> <span class="o">=</span>
+  <span class="sd">## converts the integer result from cIsNaN to a boolean</span>
+  <span class="k">if</span> <span class="n">cIsNaN</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="kp">true</span>
+  <span class="k">else</span><span class="p">:</span> <span class="kp">false</span>
+</pre>
+
+
+<h4>More Statistics</h4>
+<p>With NaN taken care of I began writing more procedures for descriptive statistics like <code>median</code>, <code>skewness</code>, <code>kurtosis</code> and <code>quantile</code>. Here is the code for <code>median</code>:</p>
+<pre class="code literal-block"><span class="kn">import</span> <span class="n">algorithm</span>  <span class="c"># needed for `sort`</span>
+
+<span class="k">proc </span><span class="nf">median</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">openArray</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">):</span> <span class="kt">float</span> <span class="o">=</span> 
+  <span class="sd">## computes the median of the elements in `x`. </span>
+  <span class="sd">## If `x` is empty, NaN is returned.</span>
+
+  <span class="kd">var</span> <span class="n">sx</span> <span class="o">=</span> <span class="o">@</span><span class="n">x</span> <span class="c"># convert to a sequence since sort() won't take an openArray</span>
+  <span class="n">sx</span><span class="p">.</span><span class="n">sort</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">cmp</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">)</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="ow">mod</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="kd">var</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="p">(</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+      <span class="kd">var</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="p">(</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+  <span class="k">except</span> <span class="n">IndexError</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">NAN</span>
+</pre>
+
+
+<ul>
+<li>The <code>median</code> procedure takes an <code>openArray</code> type as it's input, similar to the <code>mean</code> procedure in the math module. <a href="http://nim-lang.org/manual.html#open-arrays">Open arrays</a> in Nim make passing arrays of different sizes to procedures possible. The <code>openArray</code> type has some basic operations available, but we can't send one to the <code>sort</code> procedure so we need to convert it to a sequence first (by using the <code>@</code> function on <code>x</code>).</li>
+<li>The use of the <code>div</code> procedure when computing the index of the sorted sequence is required since it does integer division, unlike <code>/</code> which returns a float.</li>
+<li>Nim has a <code>try...except</code> syntax similar to Python and it's used here to catch when an empty array is send to the procedure.</li>
+<li>Also note that we are using the <code>NAN</code> constant we created above.</li>
+</ul>
+<p>Now that we have a working <code>median</code> procedure, let's add some tests:</p>
+<pre class="code literal-block"><span class="k">when</span> <span class="n">isMainModule</span><span class="p">:</span>
+  <span class="c"># Setup some test data</span>
+  <span class="kd">var</span> <span class="n">data1</span><span class="p">:</span> <span class="kt">array</span><span class="o">[</span><span class="mf">0</span><span class="p">..</span><span class="mi">6</span><span class="p">,</span> <span class="kt">float</span><span class="o">]</span>
+  <span class="kd">var</span> <span class="n">data2</span><span class="p">:</span> <span class="kt">array</span><span class="o">[</span><span class="mf">0</span><span class="p">..</span><span class="mi">7</span><span class="p">,</span> <span class="kt">float</span><span class="o">]</span>
+  <span class="kd">var</span> <span class="n">data3</span> <span class="o">=</span> <span class="n">newSeq</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">()</span>
+  <span class="kd">var</span> <span class="n">data4</span><span class="p">:</span> <span class="kt">array</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="kt">float</span><span class="o">]</span>
+  <span class="kd">var</span> <span class="n">data5</span><span class="p">:</span> <span class="kt">array</span><span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="kt">float</span><span class="o">]</span>
+  <span class="n">data1</span> <span class="o">=</span> <span class="o">[</span><span class="mf">1.4</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mf">9.3</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">,</span> <span class="mf">15.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="o">]</span>
+  <span class="n">data2</span> <span class="o">=</span> <span class="o">[</span><span class="mf">1.4</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mf">9.3</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">,</span> <span class="mf">15.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">]</span>
+  <span class="n">data4</span> <span class="o">=</span> <span class="o">[</span><span class="mf">2.3</span><span class="o">]</span>
+  <span class="n">data5</span> <span class="o">=</span> <span class="o">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">]</span>
+
+  <span class="c"># Test median()</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">6.5</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">)</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">5.05</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">)</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">isNaN</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data3</span><span class="p">)))</span>  <span class="c"># test an empty sequence</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data4</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.3</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">)</span>
+  <span class="n">assert</span><span class="p">(</span><span class="n">abs</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data5</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.35</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-8</span><span class="p">)</span> 
+</pre>
+
+
+<p>Given this is floating point math we shouldn't use <code>==</code> tests.  I also went back and fixed the ones I used for the <code>GaussDist</code> test in <a href="../getting-started-with-nim">Part 1</a>. </p>
+<p>As I was working through other procedures I got caught by Nim's static typing. Sometimes the code looks enough like Python that I forget to check that the appropriate types are being used for procedures. Here's the code for the <code>quantile</code> procedure as an example:</p>
+<pre class="code literal-block"><span class="k">proc </span><span class="nf">quantile</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">openArray</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">,</span> <span class="n">frac</span><span class="p">:</span> <span class="kt">float</span><span class="p">):</span> <span class="kt">float</span> <span class="o">=</span> 
+  <span class="sd">## Computes the quantile value of `x` determined by the fraction `frac`</span>
+  <span class="sd">## If `x` is empty, NaN is returned.</span>
+  <span class="sd">## `frac` must be between 0 and 1 so for the 25th quantile </span>
+  <span class="sd">## the value should be 0.25, any other value returns `NaN`</span>
+  <span class="k">if</span> <span class="n">x</span><span class="p">.</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">NAN</span>  
+  <span class="k">elif</span> <span class="n">frac</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">frac</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">NAN</span>
+  <span class="k">elif</span> <span class="n">frac</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">min</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="kd">var</span> <span class="n">sx</span> <span class="o">=</span> <span class="o">@</span><span class="n">x</span> <span class="c"># convert to a sequence since sort() won't take an openArray</span>
+    <span class="n">sx</span><span class="p">.</span><span class="n">sort</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">cmp</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">)</span>
+
+    <span class="kd">var</span> <span class="n">n</span> <span class="o">=</span> <span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c"># max index</span>
+    <span class="kd">var</span> <span class="n">i</span> <span class="o">=</span> <span class="kt">int</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="n">floor</span><span class="p">(</span><span class="kt">float</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">frac</span><span class="p">))</span>  <span class="c"># quantile index</span>
+
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">n</span><span class="o">]</span>
+    <span class="k">elif</span> <span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="ow">mod</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="c"># even length</span>
+      <span class="kd">var</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+      <span class="kd">var</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">]</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># odd length</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">i</span><span class="o">]</span>
+</pre>
+
+
+<p>You can see in line 17 that we need to convert <code>n</code> to a float before it can be multiplied by <code>frac</code> (a float). This is because Nim will not automatically convert an <code>int</code> to a <code>float</code> [<a href="http://nim-lang.org/tut1.html#floats">ref</a>]. The result is then converted back to an <code>int</code> so it can be used as an index for the sequence. Thankfully Nim provides useful feedback when things are wrong and tries to point you in the right direction.  Here's the error when I try to compile without converting <code>n</code> to a float.</p>
+<pre class="code literal-block"><span class="n">Error</span><span class="o">:</span> <span class="n">type</span> <span class="n">mismatch</span><span class="o">:</span> <span class="n">got</span> <span class="o">(</span><span class="n">int</span><span class="o">,</span> <span class="n">float</span><span class="o">)</span>
+<span class="n">but</span> <span class="n">expected</span> <span class="n">one</span> <span class="n">of</span><span class="o">:</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="kd">set</span><span class="o">[</span><span class="n">T</span><span class="o">],</span> <span class="n">y</span><span class="o">:</span> <span class="kd">set</span><span class="o">[</span><span class="n">T</span><span class="o">]):</span> <span class="kd">set</span><span class="o">[</span><span class="n">T</span><span class="o">]</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">int</span><span class="o">):</span> <span class="n">int</span>
+<span class="n">algorithm</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int</span><span class="o">,</span> <span class="n">order</span><span class="o">:</span> <span class="n">SortOrder</span><span class="o">):</span> <span class="n">int</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int64</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">int64</span><span class="o">):</span> <span class="n">int64</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int32</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">int32</span><span class="o">):</span> <span class="n">int32</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int8</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">int8</span><span class="o">):</span> <span class="n">int8</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">float</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">float</span><span class="o">):</span> <span class="n">float</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">float32</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">float32</span><span class="o">):</span> <span class="n">float32</span>
+<span class="n">system</span><span class="o">.*(</span><span class="n">x</span><span class="o">:</span> <span class="n">int16</span><span class="o">,</span> <span class="n">y</span><span class="o">:</span> <span class="n">int16</span><span class="o">):</span> <span class="n">int16</span>
+</pre>
+
+
+<p>So the <code>*</code> procedure is looking for two parameters of the same type, but it's getting an <code>int</code> and a <code>float</code>. Fix that and things will work.</p>
+<p>All in all I like what I've seen so far with Nim. I feel it was easy to pick up and get started. The documentation is adequate but not complete, which is not surprising for a young language. So far I've used it more like a complied Python and haven't gotten too deep into its unique features. It will be interesting to see if it can be used to create Python modules, maybe by interfacing through <a href="http://cython.org/">cython</a>. But that's for another time.</p>
+<p>You can find the code for my <code>nim-statistics</code> module <a href="https://github.com/akehrer/nim-statistics">here</a>.</p>
+<h4>Reference</h4>
+<p><a href="../getting-started-with-nim">Part 1</a>  </p>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/nim/" rel="tag">nim</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../getting-started-with-nim/" rel="prev" title="Getting Started With Nim">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../connecting-nim-to-python/" rel="next" title="Connecting Nim to Python">Next post</a>
+            </li>
+        </ul></nav></aside></article><footer id="footer"><p>Contents © 2015         <a href="mailto:akehrer@gmail.com">Aaron Kehrer</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         </p>
+            
+        </footer>
+</div>
+    </div>
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    
+    
+    
+    
+
+    
+</body>
+</html>
