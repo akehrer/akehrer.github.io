@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " vocab="http://ogp.me/ns" lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Connecting Nim to Python | Down Highway40</title>
+<link href="../../assets/css/all.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
+<link rel="canonical" href="http://akehrer.github.io/posts/connecting-nim-to-python/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Aaron Kehrer">
+<link rel="prev" href="../getting-started-with-nim-2/" title="Getting Started With Nim - Part 2" type="text/html">
+<meta property="og:site_name" content="Down Highway40">
+<meta property="og:title" content="Connecting Nim to Python">
+<meta property="og:url" content="http://akehrer.github.io/posts/connecting-nim-to-python/">
+<meta property="og:description" content="In my previous post I ended with a statement inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things to work. So, let's get to the code.
+
+
+Com">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2015-01-24T10:18:00-04:00">
+<meta property="article:tag" content="nim">
+<meta property="article:tag" content="python">
+</head>
+<body>
+    <a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+            styles, `#sidebar-checkbox` for behavior. -->
+    <input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox"><!-- Toggleable sidebar --><div class="sidebar" id="sidebar">
+        <div class="sidebar-item">
+            <p>A reserved <a href="http://getnikola.com" target="_blank">Nikola</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a> for Jekyll,
+            ported to Nikola by <a href="https://twitter.com/ralsina" target="_blank">@ralsina</a>.</p>
+        </div>
+        
+    <nav id="menu" role="navigation" class="sidebar-nav"><a class="sidebar-nav-item" href="../../archive.html">Archive</a>
+        <a class="sidebar-nav-item" href="../../categories/">Tags</a>
+        <a class="sidebar-nav-item" href="../../rss.xml">RSS feed</a>
+    
+    
+    </nav>
+</div>
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          
+    <h3 id="brand" class="masthead-title">
+      <a href="http://akehrer.github.io/" title="Down Highway40" rel="home">Down Highway40</a>
+    </h3>
+
+        </div>
+      </div>
+
+      <div class="container content" id="content">
+        
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="post-title p-name entry-title" itemprop="headline name"><a href="." class="u-url">Connecting Nim to Python</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn">Aaron Kehrer</span></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="post-date published dt-published" datetime="2015-01-24T10:18:00-04:00" itemprop="datePublished" title="2015-01-24 10:18">2015-01-24 10:18</time></a></p>
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div>
+<p>In my <a href="../getting-started-with-nim-2">previous</a> post I ended with a statement inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things to work. So, let's get to the code.</p>
+<!-- TEASER_END -->
+
+<h4>Compiling a library</h4>
+<p>The first thing we need to touch on is the Nim compiler. In most cases you turn your Nim code in to an executable by running the command.</p>
+<pre class="code literal-block">nim c projectfile.nim
+</pre>
+
+
+<p>But to turn the code in to a library we'll need to look at the <a href="http://nim-lang.org/nimc.html">compiler's documentation</a>. There are quite a few options but the one we are interested in is <code>--app</code> and in our case we'll use the <code>--app:lib</code> command to create a shared library (<code>.dll</code> in Windows, <code>.so</code> in linux, <code>.dylib</code> in OSX).</p>
+<pre class="code literal-block">nim c --app:lib projectfile.nim
+</pre>
+
+
+<p>Running the above command should create a <code>projectfile.dll</code> or <code>libprojectfile.so</code> file in the same directory as the <code>.nim</code> file. That's great, but it doesn't quite get us what we want. The library has been created but none of our functions have been exposed. Not very useful.</p>
+<h4>The <code>exportc</code> &amp; <code>dynlib</code> pragmas</h4>
+<p>Nim has special methods called <a href="http://nim-lang.org/manual.html#pragmas">pragmas</a> that give the compiler extra information when it's parsing specific pieces of code. We've already seen them in use in my previous posts. Remember the following code to load the <code>isnan</code> function from <code>math.h</code>?</p>
+<pre class="code literal-block"><span class="kn">import</span> <span class="n">math</span>
+
+<span class="k">proc </span><span class="nf">cIsNaN</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="kt">float</span><span class="p">):</span> <span class="kt">int</span> <span class="p">{.</span><span class="n">importc</span><span class="p">:</span> <span class="s">"isnan"</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s">"&lt;math.h&gt;"</span><span class="p">.}</span>
+  <span class="sd">## returns non-zero if x is not a number</span>
+</pre>
+
+
+<p>In the above the code between <code>{.</code> and <code>.}</code> contains the <code>importc</code> pragma that tells the compiler to use the code from the <code>isnan</code> funtion in <code>math.h</code> for the <code>cIsNaN</code> Nim procedure.</p>
+<p>So, if Nim has a way to import code from C it should also have a way to export code to C; and it does, <code>exportc</code>. Using <code>exportc</code> we can tell the compiler to expose our function to the outside. This plus the <a href="http://nim-lang.org/manual.html#dynlib-pragma-for-import"><code>dynlib</code></a> pragma makes sure we can access our procedure from the library.</p>
+<p>Let's start with something simple.</p>
+<pre class="code literal-block"><span class="k">proc </span><span class="nf">summer</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kt">float</span><span class="p">):</span> <span class="kt">float</span> <span class="p">{.</span> <span class="n">exportc</span><span class="p">,</span> <span class="n">dynlib</span> <span class="p">.}</span> <span class="o">=</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</pre>
+
+
+<p>Saving this as <code>test1.nim</code> and running <code>nim -c --app:lib test1.nim</code> gives us a <code>test1.dll</code> file in windows. Now let's see if we can use it.</p>
+<h4>Python <code>ctypes</code>
+</h4>
+<p>To access our compiled library we'll use Python's <a href="https://docs.python.org/2/library/ctypes.html"><code>ctypes</code></a> module which has been part of the standard library since version 2.5. It allows us to access the C based code that's been compiled in to our library and convert between Python types and C types. Here's the code to access our <code>summer</code> function.</p>
+<pre class="code literal-block"><span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">test_lib</span> <span class="o">=</span> <span class="n">CDLL</span><span class="p">(</span><span class="s">'test1'</span><span class="p">)</span>
+
+    <span class="c"># Function parameter types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_float</span><span class="p">,</span> <span class="n">c_float</span><span class="p">]</span>
+
+    <span class="c"># Function return types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">c_float</span>
+
+    <span class="n">sum_res</span> <span class="o">=</span> <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'The sum of 1.0 and 3.0 is: </span><span class="si">%f</span><span class="s">'</span><span class="o">%</span><span class="n">sum_res</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre>
+
+
+<p>We can see that after loading the library we set the argument and return types of the function and then call the function with a couple numbers. Let's see what happens.</p>
+<pre class="code literal-block">C:\Workspaces\nim-tests&gt;python test1.py
+The sum of 1.0 and 3.0 is: 32.000008
+</pre>
+
+
+<p>Hmmm, that's not right. It looks like we may not have used the correct types for my arguments and return. Let's compare the Nim <code>float</code> type to the Python ctypes <code>c_float</code> type. According to the <a href="http://nim-lang.org/manual.html#pre-defined-floating-point-types">Nim manual</a> it's <code>float</code> type is set to "the processor's fastest floating point type". The Python <a href="https://docs.python.org/2/library/ctypes.html#fundamental-data-types">ctypes manual</a> says a <code>c_float</code> is the same as a <code>float</code> in C. Since I'm running this code using the 32-bit versions of both Nim and Python (2.7) on a 64-bit Windows machine is the Nim compiler making its <code>float</code> a <code>double</code>?</p>
+<pre class="code literal-block"><span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">test_lib</span> <span class="o">=</span> <span class="n">CDLL</span><span class="p">(</span><span class="s">'test1'</span><span class="p">)</span>
+
+    <span class="c"># Function parameter types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_double</span><span class="p">,</span> <span class="n">c_double</span><span class="p">]</span>
+
+    <span class="c"># Function return types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">c_double</span>
+
+    <span class="n">sum_res</span> <span class="o">=</span> <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'The sum of 1.0 and 3.0 is: </span><span class="si">%f</span><span class="s">'</span><span class="o">%</span><span class="n">sum_res</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre>
+
+
+<pre class="code literal-block">C:\Workspaces\nim-tests&gt;python test1.py
+The sum of 1.0 and 3.0 is: 4.000000
+</pre>
+
+
+<p>That seems to have fixed it. When we know we are going to be using <code>exportc</code> or creating a shared library Nim has <a href="http://nim-lang.org/manual.html#types">types</a> that let us add more constraint and reduce these types of mix-ups (e.g. <code>cfloat</code>, <code>cint</code>).</p>
+<h4>
+<code>openArray</code> arguments &amp; the header file</h4>
+<p>Now let's try something a little more complex and take the <code>median</code> function from the <a href="https://github.com/akehrer/nim-statistics"><code>statistics</code></a> module I created in my last two posts.</p>
+<p>Nim code:</p>
+<pre class="code literal-block"><span class="k">proc </span><span class="nf">median</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">openArray</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">):</span> <span class="kt">float</span> <span class="p">{.</span> <span class="n">exportc</span><span class="p">,</span> <span class="n">dynlib</span> <span class="p">.}</span> <span class="o">=</span> 
+  <span class="sd">## Computes the median of the elements in `x`. </span>
+  <span class="sd">## If `x` is empty, NaN is returned.</span>
+  <span class="k">if</span> <span class="n">x</span><span class="p">.</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">NAN</span>
+
+  <span class="kd">var</span> <span class="n">sx</span> <span class="o">=</span> <span class="o">@</span><span class="n">x</span> <span class="c"># convert to a sequence since sort() won't take an openArray</span>
+  <span class="n">sx</span><span class="p">.</span><span class="n">sort</span><span class="p">(</span><span class="n">system</span><span class="p">.</span><span class="n">cmp</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="ow">mod</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="kd">var</span> <span class="n">n1</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="p">(</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+    <span class="kd">var</span> <span class="n">n2</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">sx</span><span class="o">[</span><span class="p">(</span><span class="n">sx</span><span class="p">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">div</span> <span class="mi">2</span><span class="o">]</span>
+</pre>
+
+
+<p>Python code:</p>
+<pre class="code literal-block"><span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">test_lib</span> <span class="o">=</span> <span class="n">CDLL</span><span class="p">(</span><span class="s">'test1'</span><span class="p">)</span>
+
+    <span class="c"># Function parameter types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c_double</span><span class="p">,</span> <span class="n">c_double</span><span class="p">]</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">median</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">POINTER</span><span class="p">(</span><span class="n">c_double</span><span class="p">),</span> <span class="n">c_int</span><span class="p">]</span>
+
+    <span class="c"># Function return types</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">c_double</span>
+    <span class="n">test_lib</span><span class="o">.</span><span class="n">median</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">c_double</span>
+
+    <span class="c"># Calc some numbers</span>
+    <span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]</span>
+    <span class="n">nums_arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">c_double</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nums</span><span class="p">))()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nums</span><span class="p">):</span>
+        <span class="n">nums_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_double</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="n">sum_res</span> <span class="o">=</span> <span class="n">test_lib</span><span class="o">.</span><span class="n">summer</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'The sum of 1.0 and 3.0 is: </span><span class="si">%f</span><span class="s">'</span><span class="o">%</span><span class="n">sum_res</span><span class="p">)</span>
+
+    <span class="n">med_res</span> <span class="o">=</span> <span class="n">test_lib</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">nums_arr</span><span class="p">,</span> <span class="n">c_int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nums_arr</span><span class="p">)))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">'The median of </span><span class="si">%s</span><span class="s"> is: </span><span class="si">%f</span><span class="s">'</span><span class="o">%</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">med_res</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre>
+
+
+<p>There's some interesting stuff happening here to allow us to call the <code>median</code> procedure. In the Nim code you can see that it's only looking for one argument, an <code>openArray</code> of floats. Like we saw in <a href="../getting-started-with-nim-2">Part 2</a>, <code>openArrays</code> make passing arrays of different sizes to procedures possible. But how does this translate into the C library? (You can probably guess from the Python code.) One thing that may help us is an additional argument that can be passed to the Nim compiler.</p>
+<pre class="code literal-block">nim c --app:lib --header test1.nim
+</pre>
+
+
+<p>The <code>--header</code> option will produce a C header file in the <code>nimcache</code> folder where the module is compiled. If we look at the header we'll see the following.</p>
+<pre class="code literal-block"><span class="cm">/* Generated by Nim Compiler v0.10.2 */</span>
+<span class="cm">/*   (c) 2014 Andreas Rumpf */</span>
+<span class="cm">/* The generated code is subject to the original license. */</span>
+<span class="cm">/* Compiled for: Windows, i386, gcc */</span>
+<span class="cm">/* Command for C compiler:</span>
+<span class="cm">   gcc.exe -c  -w  -IC:\NIM\lib -o c:\workspaces\nim-tests\nimcache\test1.o c:\workspaces\nim-tests\nimcache\test1.h */</span>
+<span class="cp">#ifndef __test1__</span>
+<span class="cp">#define __test1__</span>
+<span class="cp">#define NIM_INTBITS 32</span>
+<span class="cp">#include "nimbase.h"</span>
+<span class="n">N_NOCONV</span><span class="p">(</span><span class="kt">void</span><span class="p">,</span> <span class="n">signalHandler</span><span class="p">)(</span><span class="kt">int</span> <span class="n">sig</span><span class="p">);</span>
+<span class="n">N_NIMCALL</span><span class="p">(</span><span class="n">NI</span><span class="p">,</span> <span class="n">getRefcount</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p</span><span class="p">);</span>
+<span class="n">N_LIB_IMPORT</span> <span class="nf">N_CDECL</span><span class="p">(</span><span class="n">NF</span><span class="p">,</span> <span class="n">median</span><span class="p">)(</span><span class="n">NF</span><span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">NI</span> <span class="n">xLen0</span><span class="p">);</span>
+<span class="n">N_LIB_IMPORT</span> <span class="nf">N_CDECL</span><span class="p">(</span><span class="n">NF</span><span class="p">,</span> <span class="n">summer</span><span class="p">)(</span><span class="n">NF</span> <span class="n">x</span><span class="p">,</span> <span class="n">NF</span> <span class="n">y</span><span class="p">);</span>
+<span class="n">N_LIB_IMPORT</span> <span class="nf">N_CDECL</span><span class="p">(</span><span class="kt">void</span><span class="p">,</span> <span class="n">NimMain</span><span class="p">)(</span><span class="kt">void</span><span class="p">);</span>
+<span class="cp">#endif </span><span class="cm">/* __test1__ */</span><span class="cp"></span>
+</pre>
+
+
+<p>The important lines are 13 and 14 where our two exported procedures are called out. We can see that <code>summer</code> is looking for two <code>NF</code> type arguments which we can assume are Nim type floats. <code>median</code> on the other hand is looking for not one argument like in the Nim procedure we defined but two, a pointer to an <code>NF</code> and an <code>NI</code> which is a Nim integer. There's also a hint about what that integer is, a length value. So the <code>openArray</code> argument has been translated in to a standard way of passing arrays in C, a pointer to the array and the length of the array.</p>
+<p>In the Python code you can see we set the correct arguments (<code>[POINTER(c_double), c_int]</code>) and return type (<code>c_double</code>) and in lines 15 through 18 we cast a Python list of floats in to a C array of doubles. Then when we call the function in line 23 we make sure to convert the list's length to a <code>c_int</code>. Let's check the results.</p>
+<pre class="code literal-block">C:\Workspaces\nim-tests&gt;python test1.py
+The sum of 1.0 and 3.0 is: 4.000000
+The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
+</pre>
+
+
+<p>That looks good, and it's probably enough for this post. In future posts we'll look at interfacing with more types like strings, tuples, and custom objects.</p>
+<h4>Reference</h4>
+<p><a href="http://nim-lang.org/nimc.html">Nim Compiler User Guide</a><br><a href="http://nim-lang.org/manual.html">Nim Manual</a><br><a href="https://docs.python.org/2/library/ctypes.html">Python ctypes</a><br><a href="http://jjd-comp.che.wisc.edu/index.php/PythonCtypesTutorial">Python ctypes Tutorial</a>  </p>
+<p>(Thanks to dom96 for corrections.)</p>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/nim/" rel="tag">nim</a></li>
+            <li><a class="tag p-category" href="../../categories/python/" rel="tag">python</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../getting-started-with-nim-2/" rel="prev" title="Getting Started With Nim - Part 2">Previous post</a>
+            </li>
+        </ul></nav></aside></article><footer id="footer"><p>Contents © 2015         <a href="mailto:akehrer@gmail.com">Aaron Kehrer</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         </p>
+            
+        </footer>
+</div>
+    </div>
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    
+    
+    
+    
+
+    
+</body>
+</html>
