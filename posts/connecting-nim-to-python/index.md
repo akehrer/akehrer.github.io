@@ -11,7 +11,7 @@ In my [previous][part-2] post I ended with a statement inquiring about interfaci
 
 <!-- TEASER_END -->
 
-### Compiling a library
+# Compiling a library
 The first thing we need to touch on is the Nim compiler. In most cases you turn your Nim code in to an executable by running the command.
 
     nim c projectfile.nim
@@ -22,7 +22,7 @@ But to turn the code in to a library we'll need to look at the [compiler's docum
 
 Running the above command should create a `projectfile.dll` or `libprojectfile.so` file in the same directory as the `.nim` file. That's great, but it doesn't quite get us what we want. The library has been created but none of our functions have been exposed. Not very useful.
 
-### The `exportc` & `dynlib` pragmas
+# The `exportc` & `dynlib` pragmas
 Nim has special methods called [pragmas](http://nim-lang.org/manual.html#pragmas) that give the compiler extra information when it's parsing specific pieces of code. We've already seen them in use in my previous posts. Remember the following code to load the `isnan` function from `math.h`?
 
 ``` nim
@@ -45,7 +45,7 @@ proc summer*(x, y: float): float {. exportc, dynlib .} =
 
 Saving this as `test1.nim` and running `nim -c --app:lib test1.nim` gives us a `test1.dll` file in windows. Now let's see if we can use it.
 
-### Python `ctypes`
+# Python `ctypes`
 To access our compiled library we'll use Python's [`ctypes`](https://docs.python.org/2/library/ctypes.html) module which has been part of the standard library since version 2.5. It allows us to access the C based code that's been compiled in to our library and convert between Python types and C types. Here's the code to access our `summer` function.
 
 ``` python
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
 That seems to have fixed it. When we know we are going to be using `exportc` or creating a shared library Nim has [types](http://nim-lang.org/manual.html#types) that let us add more constraint and reduce these types of mix-ups (e.g. `cfloat`, `cint`).
 
-### `openArray` arguments & the header file
+# `openArray` arguments & the header file
 Now let's try something a little more complex and take the `median` function from the [`statistics`](https://github.com/akehrer/nim-statistics) module I created in my last two posts.
 
 Nim code:
@@ -186,7 +186,7 @@ In the Python code you can see we set the correct arguments (`[POINTER(c_double)
 
 That looks good, and it's probably enough for this post. In future posts we'll look at interfacing with more types like strings, tuples, and custom objects.
 
-### Reference
+# Reference
 [Nim Compiler User Guide](http://nim-lang.org/nimc.html)  
 [Nim Manual](http://nim-lang.org/manual.html)  
 [Python ctypes](https://docs.python.org/2/library/ctypes.html)  

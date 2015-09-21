@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>Connecting Nim to Python | Down Highway40</title>
+<title>Connecting Nim to Python | Highway40</title>
 <link href="../../assets/css/all.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
 <link rel="canonical" href="http://akehrer.github.io/posts/connecting-nim-to-python/">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Aaron Kehrer">
 <link rel="prev" href="../getting-started-with-nim-2/" title="Getting Started With Nim - Part 2" type="text/html">
-<meta property="og:site_name" content="Down Highway40">
+<link rel="next" href="../setting-up-nikola-and-github/" title="Setting up Nikloa for Personal Github Sites" type="text/html">
+<meta property="og:site_name" content="Highway40">
 <meta property="og:title" content="Connecting Nim to Python">
 <meta property="og:url" content="http://akehrer.github.io/posts/connecting-nim-to-python/">
 <meta property="og:description" content="In my previous post I ended with a statement inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things to work. So, let's get to the code.
@@ -47,7 +48,7 @@ Com">
         <div class="container">
           
     <h3 id="brand" class="masthead-title">
-      <a href="http://akehrer.github.io/" title="Down Highway40" rel="home">Down Highway40</a>
+      <a href="http://akehrer.github.io/" title="Highway40" rel="home">Highway40</a>
     </h3>
 
         </div>
@@ -68,7 +69,7 @@ Com">
 <p>In my <a href="../getting-started-with-nim-2">previous</a> post I ended with a statement inquiring about interfacing Nim code with Python and after some experimentation I've been able to get some things to work. So, let's get to the code.</p>
 <!-- TEASER_END -->
 
-<h4>Compiling a library</h4>
+<h2>Compiling a library</h2>
 <p>The first thing we need to touch on is the Nim compiler. In most cases you turn your Nim code in to an executable by running the command.</p>
 <pre class="code literal-block">nim c projectfile.nim
 </pre>
@@ -80,7 +81,7 @@ Com">
 
 
 <p>Running the above command should create a <code>projectfile.dll</code> or <code>libprojectfile.so</code> file in the same directory as the <code>.nim</code> file. That's great, but it doesn't quite get us what we want. The library has been created but none of our functions have been exposed. Not very useful.</p>
-<h4>The <code>exportc</code> &amp; <code>dynlib</code> pragmas</h4>
+<h2>The <code>exportc</code> &amp; <code>dynlib</code> pragmas</h2>
 <p>Nim has special methods called <a href="http://nim-lang.org/manual.html#pragmas">pragmas</a> that give the compiler extra information when it's parsing specific pieces of code. We've already seen them in use in my previous posts. Remember the following code to load the <code>isnan</code> function from <code>math.h</code>?</p>
 <pre class="code literal-block"><span class="kn">import</span> <span class="n">math</span>
 
@@ -98,8 +99,8 @@ Com">
 
 
 <p>Saving this as <code>test1.nim</code> and running <code>nim -c --app:lib test1.nim</code> gives us a <code>test1.dll</code> file in windows. Now let's see if we can use it.</p>
-<h4>Python <code>ctypes</code>
-</h4>
+<h2>Python <code>ctypes</code>
+</h2>
 <p>To access our compiled library we'll use Python's <a href="https://docs.python.org/2/library/ctypes.html"><code>ctypes</code></a> module which has been part of the standard library since version 2.5. It allows us to access the C based code that's been compiled in to our library and convert between Python types and C types. Here's the code to access our <code>summer</code> function.</p>
 <pre class="code literal-block"><span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="o">*</span>
 
@@ -152,8 +153,8 @@ The sum of 1.0 and 3.0 is: 4.000000
 
 
 <p>That seems to have fixed it. When we know we are going to be using <code>exportc</code> or creating a shared library Nim has <a href="http://nim-lang.org/manual.html#types">types</a> that let us add more constraint and reduce these types of mix-ups (e.g. <code>cfloat</code>, <code>cint</code>).</p>
-<h4>
-<code>openArray</code> arguments &amp; the header file</h4>
+<h2>
+<code>openArray</code> arguments &amp; the header file</h2>
 <p>Now let's try something a little more complex and take the <code>median</code> function from the <a href="https://github.com/akehrer/nim-statistics"><code>statistics</code></a> module I created in my last two posts.</p>
 <p>Nim code:</p>
 <pre class="code literal-block"><span class="k">proc </span><span class="nf">median</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">openArray</span><span class="o">[</span><span class="kt">float</span><span class="o">]</span><span class="p">):</span> <span class="kt">float</span> <span class="p">{.</span> <span class="n">exportc</span><span class="p">,</span> <span class="n">dynlib</span> <span class="p">.}</span> <span class="o">=</span> 
@@ -239,7 +240,7 @@ The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
 
 
 <p>That looks good, and it's probably enough for this post. In future posts we'll look at interfacing with more types like strings, tuples, and custom objects.</p>
-<h4>Reference</h4>
+<h2>Reference</h2>
 <p><a href="http://nim-lang.org/nimc.html">Nim Compiler User Guide</a><br><a href="http://nim-lang.org/manual.html">Nim Manual</a><br><a href="https://docs.python.org/2/library/ctypes.html">Python ctypes</a><br><a href="http://jjd-comp.che.wisc.edu/index.php/PythonCtypesTutorial">Python ctypes Tutorial</a>  </p>
 <p>(Thanks to dom96 for corrections.)</p>
 </div>
@@ -251,6 +252,9 @@ The median of [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0] is: 4.500000
 <ul class="pager hidden-print">
 <li class="previous">
                 <a href="../getting-started-with-nim-2/" rel="prev" title="Getting Started With Nim - Part 2">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../setting-up-nikola-and-github/" rel="next" title="Setting up Nikloa for Personal Github Sites">Next post</a>
             </li>
         </ul></nav></aside></article><footer id="footer"><p>Contents © 2015         <a href="mailto:akehrer@gmail.com">Aaron Kehrer</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         </p>
             

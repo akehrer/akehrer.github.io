@@ -11,7 +11,7 @@
 
 <!-- TEASER_END -->
 
-### NaN
+# NaN
 Some of the functions in the built-in `math` module return `NaN` as a value but I could not find an easy way in Nim to check for this. Luckily the standard `math.h` library includes an `isnan()` function that we can reuse. In this case I have created an additional procedure to convert the integer result from the C function to a boolean. You can see I also created a NAN constant that I used in some of my code. 
 
 ``` nim
@@ -29,7 +29,7 @@ proc isNaN*(x: float): bool =
   else: false
 ```
 
-### More Statistics
+# More Statistics
 With NaN taken care of I began writing more procedures for descriptive statistics like `median`, `skewness`, `kurtosis` and `quantile`. Here is the code for `median`:
 
 ``` nim
@@ -137,7 +137,7 @@ All in all I like what I've seen so far with Nim. I feel it was easy to pick up 
 
 You can find the code for my `nim-statistics` module [here](https://github.com/akehrer/nim-statistics).
 
-### Reference
+# Reference
 [Part 1][part-1]  
 
 [part-1]: link://slug/getting-started-with-nim

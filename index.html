@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="description" content="Theme Song!">
 <meta name="viewport" content="width=device-width">
-<title>Down Highway40 | Down Highway40</title>
+<title>Highway40 | Highway40</title>
 <link href="assets/css/all.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="rss.xml">
 <link rel="canonical" href="http://akehrer.github.io/">
-<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/connecting-nim-to-python/" type="text/html">
+<!--[if lt IE 9]><script src="assets/js/html5.js"></script><![endif]--><link rel="prefetch" href="posts/setting-up-nikola-and-github/" type="text/html">
 </head>
 <body>
     <a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
@@ -36,7 +36,7 @@
         <div class="container">
           
     <h3 id="brand" class="masthead-title">
-      <a href="http://akehrer.github.io/" title="Down Highway40" rel="home">Down Highway40</a>
+      <a href="http://akehrer.github.io/" title="Highway40" rel="home">Highway40</a>
     </h3>
 
         </div>
@@ -46,7 +46,44 @@
         
 
 <div class="posts">
-    <article class="post h-entry post-text"><header><h1 class="post-title p-name"><a href="posts/connecting-nim-to-python/" class="u-url">Connecting Nim to Python</a></h1>
+    <article class="post h-entry post-text"><header><h1 class="post-title p-name"><a href="posts/setting-up-nikola-and-github/" class="u-url">Setting up Nikloa for Personal Github Sites</a></h1>
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn">Aaron Kehrer</span></p>
+            <p class="dateline"><a href="posts/setting-up-nikola-and-github/" rel="bookmark"><time class="post-date published dt-published" datetime="2015-09-21T15:01:00-04:00" title="2015-09-21 15:01">2015-09-21 15:01</time></a></p>
+        </div>
+    </header><div class="p-summary entry-summary">
+    <div>
+<p>After a bit of a struggle I finally moved my personal Github site over from Jekyll to <a href="https://getnikola.com/">Nikola</a>. I'm documenting what I did here for my future self and in case it's useful to anyone else.</p>
+<h2>Github setup</h2>
+<ul>
+<li>Create <code>source</code> branch in addition to <code>master</code>, all of the Nickola stuff will happen here. The <code>master</code> branch is where the static site will be served from and the output from <code>nikola build</code> will be put there using <code>ghp-import</code>. </li>
+<li>Checkout the <code>source</code> branch and initialize your Nikola site (see <a href="https://getnikola.com/getting-started.html">Nikola getting started</a>)</li>
+<li>You can now all the things you need to do with Nikola (pages, posts, theme, <a href="https://getnikola.com/handbook.html">etc.</a>)</li>
+</ul>
+<h2>Syncing site</h2>
+<p>I am having trouble getting <code>nikola github_deploy</code> working with my setup (Python 3.4, Window 7, in a virtualenv) so here is how I am doing it manually.</p>
+<ul>
+<li>Make sure <a href="https://github.com/davisp/ghp-import"><code>ghp-import</code></a> is installed <ul>
+<li>If you are getting <code>TypeError: Type str doesn't support the buffer API</code> check <a href="https://github.com/w1ld/ghp-import/commit/0b575dfcdd459594518c66e9635d6d155397c219">here</a> for the fix.</li>
+</ul>
+</li>
+<li>Use <code>ghp-import.py -n -b master output</code>, this will<ul>
+<li>Update the <code>master</code> branch with what's in <code>./output/</code>
+</li>
+<li>Include a <code>.nojekyll</code> file to signal to Github that <code>master</code> is not Jekyll based</li>
+</ul>
+</li>
+<li>If you can use <code>nikola deploy</code> you will probably need to edit the following:</li>
+</ul>
+<pre class="code literal-block"><span class="n">GITHUB_SOURCE_BRANCH</span> <span class="o">=</span> <span class="s">'source'</span>  <span class="c"># changed from 'master'</span>
+<span class="n">GITHUB_DEPLOY_BRANCH</span> <span class="o">=</span> <span class="s">'master'</span>  <span class="c"># changed from 'gh-pages'</span>
+</pre>
+
+
+<p>Thanks to John Foster and his <a href="https://github.com/johntfoster/johntfoster.github.io">johntfoster.github.io</a> repository for the example.</p>
+</div>
+    </div>
+    </article><article class="post h-entry post-text"><header><h1 class="post-title p-name"><a href="posts/connecting-nim-to-python/" class="u-url">Connecting Nim to Python</a></h1>
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn">Aaron Kehrer</span></p>
             <p class="dateline"><a href="posts/connecting-nim-to-python/" rel="bookmark"><time class="post-date published dt-published" datetime="2015-01-24T10:18:00-04:00" title="2015-01-24 10:18">2015-01-24 10:18</time></a></p>
