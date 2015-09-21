@@ -18,7 +18,7 @@ import time
 
 # Data about this site
 BLOG_AUTHOR = "Aaron Kehrer"  # (translatable)
-BLOG_TITLE = "Down Highway40"  # (translatable)
+BLOG_TITLE = "Highway40"  # (translatable)
 # This is the main URL for your site. It will be used
 # in a prominent link. Don't forget the protocol (http/https)!
 SITE_URL = "http://akehrer.github.io/"

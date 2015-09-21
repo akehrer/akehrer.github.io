@@ -146,7 +146,7 @@ Alright, so that's a good start. Some final notes:
   
 This was a nice first go at learning Nim and although it didn't really exercise some of the 'wow' features it gave me a good introduction to the language and a starting point to grow from. Hopefully I'll be able to flesh out the statistics module and as I learn more about Nim I will post it here.
 
-### Reference
+# Reference
 [Nim Manual](http://nim-lang.org/manual.html)  
 [Tutorial 1](http://nim-lang.org/tut1.html)  
 [Tutorial 2](http://nim-lang.org/tut2.html)  

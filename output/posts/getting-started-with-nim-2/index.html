@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
-<title>Getting Started With Nim - Part 2 | Down Highway40</title>
+<title>Getting Started With Nim - Part 2 | Highway40</title>
 <link href="../../assets/css/all.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
@@ -11,7 +11,7 @@
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Aaron Kehrer">
 <link rel="prev" href="../getting-started-with-nim/" title="Getting Started With Nim" type="text/html">
 <link rel="next" href="../connecting-nim-to-python/" title="Connecting Nim to Python" type="text/html">
-<meta property="og:site_name" content="Down Highway40">
+<meta property="og:site_name" content="Highway40">
 <meta property="og:title" content="Getting Started With Nim - Part 2">
 <meta property="og:url" content="http://akehrer.github.io/posts/getting-started-with-nim-2/">
 <meta property="og:description" content="Last time I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the">
@@ -44,7 +44,7 @@
         <div class="container">
           
     <h3 id="brand" class="masthead-title">
-      <a href="http://akehrer.github.io/" title="Down Highway40" rel="home">Down Highway40</a>
+      <a href="http://akehrer.github.io/" title="Highway40" rel="home">Highway40</a>
     </h3>
 
         </div>
@@ -65,7 +65,7 @@
 <p><a href="../getting-started-with-nim">Last time</a> I wrote about my interest in learning Nim to broaden my skills and started by creating a simple statistics module. We went over some of the nuances I learned about the language and built the beginning of a model for the <a href="http://en.wikipedia.org/wiki/Normal_distribution">Gaussian Distribution</a>. Today we'll be looking at some of the things I founds as I worked out other procedures in the module.</p>
 <!-- TEASER_END -->
 
-<h4>NaN</h4>
+<h2>NaN</h2>
 <p>Some of the functions in the built-in <code>math</code> module return <code>NaN</code> as a value but I could not find an easy way in Nim to check for this. Luckily the standard <code>math.h</code> library includes an <code>isnan()</code> function that we can reuse. In this case I have created an additional procedure to convert the integer result from the C function to a boolean. You can see I also created a NAN constant that I used in some of my code. </p>
 <pre class="code literal-block"><span class="kn">import</span> <span class="n">math</span>
 
@@ -82,7 +82,7 @@
 </pre>
 
 
-<h4>More Statistics</h4>
+<h2>More Statistics</h2>
 <p>With NaN taken care of I began writing more procedures for descriptive statistics like <code>median</code>, <code>skewness</code>, <code>kurtosis</code> and <code>quantile</code>. Here is the code for <code>median</code>:</p>
 <pre class="code literal-block"><span class="kn">import</span> <span class="n">algorithm</span>  <span class="c"># needed for `sort`</span>
 
@@ -184,7 +184,7 @@
 <p>So the <code>*</code> procedure is looking for two parameters of the same type, but it's getting an <code>int</code> and a <code>float</code>. Fix that and things will work.</p>
 <p>All in all I like what I've seen so far with Nim. I feel it was easy to pick up and get started. The documentation is adequate but not complete, which is not surprising for a young language. So far I've used it more like a complied Python and haven't gotten too deep into its unique features. It will be interesting to see if it can be used to create Python modules, maybe by interfacing through <a href="http://cython.org/">cython</a>. But that's for another time.</p>
 <p>You can find the code for my <code>nim-statistics</code> module <a href="https://github.com/akehrer/nim-statistics">here</a>.</p>
-<h4>Reference</h4>
+<h2>Reference</h2>
 <p><a href="../getting-started-with-nim">Part 1</a>  </p>
 </div>
     </div>
