@@ -12,7 +12,7 @@ After a bit of a struggle I finally moved my personal Github site over from Jeky
 # Github setup
 - Create `source` branch in addition to `master`, all of the Nickola stuff will happen here. The `master` branch is where the static site will be served from and the output from `nikola build` will be put there using `ghp-import`. 
 - Checkout the `source` branch and initialize your Nikola site (see [Nikola getting started][nkstart])
-- You can now all the things you need to do with Nikola (pages, posts, theme, [etc.](https://getnikola.com/handbook.html))
+- You can now do all the things you need to do with Nikola (pages, posts, theme, [etc.](https://getnikola.com/handbook.html))
 
 
 # Syncing site
